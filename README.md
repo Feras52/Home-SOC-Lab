@@ -23,10 +23,11 @@ Rather than relying on simulated synthetic lab traffic, this investigation analy
 ├── rules/
 │   └── custom_detection.rules         <-- Custom Suricata Detection Signatures (Pending phase 3)
 ├── iocs/
-│   ├── iocs.txt                       <-- Defanged Indicators of Compromise (Pending phase 2)
-└── screenshots/                       <-- Screenshots
-    ├── phase1_kerberos_user.png
-    └── phase1_zui_http.png
+│   └── iocs.txt                       <-- Defanged Indicators of Compromise (Pending phase 2)
+└── screenshots/                       <-- Forensic Evidence Screenshots
+    ├── kerberos.png
+    ├── log_triage_http.png
+    └── NetworkMiner_cross_validation.png
 ```
 
 ## Phase 1: Network Triage & Victim Host Identification 
@@ -37,22 +38,30 @@ During the initial network triage of capture file 2026-02-28-traffic-analysis-ex
 ### Compromised Host Identity
 
 | Asset Parameter | Extracted Value | Analysis Source & Method |
-|---|---|---|
-| Victim IP Address | 10.2.28.88 | Wireshark (Statistics -> Endpoints -> IPv4) |
-| Victim MAC Address | 00:19:d1:b2:4d:ad  | Layer 2 Ethernet Frame Headers |
-| Host System Name | DESKTOP-TEYQ2NR | NetBIOS (NBNS Name Registration) |
-| Active Directory Domain | EASYAS123 | Kerberos AS-REQ (realm) |
-| Compromised User Account | brolf | Kerberos AS-REQ (cname-string) |
+| :--- | :--- | :--- |
+| **Victim IP Address** | `10.2.28.88` | Wireshark (`Statistics -> Endpoints -> IPv4`) |
+| **Victim MAC Address** | `00:19:d1:b2:4d:ad` | Layer 2 Ethernet Frame Headers |
+| **Host System Name** | `DESKTOP-TEYQ2NR` | NetBIOS (NBNS Name Registration) |
+| **Active Directory Domain** | `EASYAS123` | Kerberos AS-REQ (`realm`) |
+| **Compromised User Account** | `brolf` | Kerberos AS-REQ (`cname-string`) |
 
-Verification Note: All extracted host identifiers and Kerberos user credentials were cross-validated using NetworkMiner's passive parsing engine (Hosts and Credentials tabs). NetworkMiner confirmed the exact IP Address, operating system TTL signatures, computer name (DESKTOP-TEYQ2NR), and Active Directory account (brolf) without requiring manual display filters.
+> **Verification Note:** All extracted host identifiers and Kerberos user credentials were cross-validated using **NetworkMiner's** passive parsing engine (`Hosts` and `Credentials` tabs). NetworkMiner confirmed the exact IP Address, operating system TTL signatures, computer name (`DESKTOP-TEYQ2NR`), and Active Directory account (`brolf`) without requiring manual display filters.
+
+![NetworkMiner Cross-Validation](screenshots/NetworkMiner_cross_validation.png)
+
+---
 
 ### Technical Evidence & Forensic Findings
 
 #### 1. Identity Extraction via Kerberos Authentication Requests
-By applying the display filter kerberos.CNameString in Wireshark, Authentication Service Requests (AS-REQ) originating from IP 10.2.28.88 toward Domain Controller 10.2.28.2 were inspected. Parsing the req-body structures revealed the user account name (brolf) and realm (EASYAS123).
+By applying the display filter `kerberos.CNameString` in Wireshark, Authentication Service Requests (`AS-REQ`) originating from IP `10.2.28.88` toward Domain Controller `10.2.28.2` were inspected. Parsing the `req-body` structures revealed the user account name (`brolf`) and realm (`EASYAS123`).
+
+![Kerberos Identity Extraction](screenshots/kerberos.png)
 
 #### 2. Log Indexing & Web Traffic Summarization via Zui
-To isolate web traffic without performance degradation, the capture was indexed in Zui. Querying the Zeek HTTP logs (_path=="http" | cut ts, id.orig_h, id.resp_h, host, uri) revealed recurring outbound HTTP web requests originating from victim host 10.2.28.88 directed toward an external IP address (45.131.214[.]85), flagging this external endpoint for deep payload inspection.
+To isolate web traffic without performance degradation, the capture was indexed in **Zui**. Querying the Zeek HTTP logs (`_path=="http" | cut ts, id.orig_h, id.resp_h, host, uri`) revealed recurring outbound HTTP web requests originating from victim host `10.2.28.88` directed toward an external IP address (`45.131.214[.]85`), flagging this external endpoint for deep payload inspection.
+
+![Zui HTTP Log Triage](screenshots/log_triage_http.png)
 
 ### Investigation Roadmap & Status
 - [x] Phase 1: Network Triage & Victim Host Identification
