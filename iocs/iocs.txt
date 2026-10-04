@@ -1,0 +1,21 @@
+# =========================================================
+# SOC Investigation - Indicators of Compromise (IOCs)
+# =========================================================
+
+# --- Victim Endpoint ---
+Victim IP Address: 10.2.28.88
+Infection Artifact: Outbound HTTP POST Beaconing
+
+# --- Network & Infrastructure Indicators ---
+C2 Server IP Address: 45.131.214[.]85
+C2 URI Endpoint: hXXp://45.131.214[.]85/fakeurl.htm
+Traffic Characteristics: HTTP POST requests sent every 60 seconds (Beaconing)
+
+# --- OSINT ---
+Infrastructure Status: Malicious Command & Control (C2) Server
+OSINT Source: VirusTotal / AbuseIPDB
+Associated Endpoint SHA-256 Hash(file1): 712c7e845543e6ddd07f724b6f9a9a0e2c84fdf6d8956fdd2bef94775b2ef707 
+Associated Endpoint SHA-256 Hash(file2): c9e5bb7a368280d771edcfdb33717a3130560d2bb71773ab1aaffe0eb585fd2c
+Internet Service Provider (ISP): MHost LLC 
+Country of origin: Germany
+Threat Type: botnet_cc

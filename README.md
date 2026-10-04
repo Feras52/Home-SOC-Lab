@@ -47,7 +47,7 @@ During the initial network triage of capture file 2026-02-28-traffic-analysis-ex
 
 > **Verification Note:** All extracted host identifiers and Kerberos user credentials were cross-validated using **NetworkMiner's** passive parsing engine (`Hosts` and `Credentials` tabs). NetworkMiner confirmed the exact IP Address, operating system TTL signatures, computer name (`DESKTOP-TEYQ2NR`), and Active Directory account (`brolf`) without requiring manual display filters.
 
-![NetworkMiner Cross-Validation](screenshots/NetworkMiner_cross_validation.png)
+![NetworkMiner Cross-Validation](screenshots/P1_NetworkMiner_cross_validation.png)
 
 ---
 
@@ -56,16 +56,68 @@ During the initial network triage of capture file 2026-02-28-traffic-analysis-ex
 #### 1. Identity Extraction via Kerberos Authentication Requests
 By applying the display filter `kerberos.CNameString` in Wireshark, Authentication Service Requests (`AS-REQ`) originating from IP `10.2.28.88` toward Domain Controller `10.2.28.2` were inspected. Parsing the `req-body` structures revealed the user account name (`brolf`) and realm (`EASYAS123`).
 
-![Kerberos Identity Extraction](screenshots/kerberos.png)
+![Kerberos Identity Extraction](screenshots/P1_kerberos.png)
 
 #### 2. Log Indexing & Web Traffic Summarization via Zui
 To isolate web traffic without performance degradation, the capture was indexed in **Zui**. Querying the Zeek HTTP logs (`_path=="http" | cut ts, id.orig_h, id.resp_h, host, uri`) revealed recurring outbound HTTP web requests originating from victim host `10.2.28.88` directed toward an external IP address (`45.131.214[.]85`), flagging this external endpoint for deep payload inspection.
 
-![Zui HTTP Log Triage](screenshots/log_triage_http.png)
+![Zui HTTP Log Triage](screenshots/P1_log_triage_http.png)
+
+---
+
+## Phase 2: Attack Chain Analysis, Payload Extraction & OSINT Threat Intelligence
+
+### Executive Summary
+Following the Phase 1 flag on `45.131.214[.]85`, the HTTP traffic was analyzed in more depth. Zeek log analysis in Zui exposed a regular beaconing pattern, the TCP conversation was reassembled to inspect the raw payloads, and the destination IP was checked against OSINT sources (VirusTotal and AbuseIPDB).
+
+### Technical Evidence & Forensic Findings
+
+#### 1. C2 Beaconing Detection via Zeek Log Analysis in Zui
+Re-querying the Zeek HTTP logs with the method field added (`_path=="http" | cut ts, id.orig_h, id.resp_h, host, uri, method`) showed that the victim machine sends **POST requests every 60 seconds** to `45.131.214[.]85`.
+
+![Zui POST Beaconing Query Result](screenshots/P2_Zui_query_result.png)
+
+**Anomalies detected:**
+1. POST requests sent to a static HTML page
+2. No DNS domain name (direct communication with an IP address)
+3. Suspicious URL (`/fakeurl.com`)
+
+> **Conclusion:** The host is actively communicating with a Command & Control (C2) server at `45.131.214[.]85` through automated POST requests (**C2 beaconing**).
+
+#### 2. TCP Stream Reassembly & Payload Analysis
+The TCP conversation was reassembled to analyze the exact data payload sent by the victim host and the response returned by the C2 server.
+
+![HTTP Stream Reassembly](screenshots/P2_http_stream.png)
+
+| Characteristic | Extracted Value |
+| :--- | :--- |
+| **Protocol & Port** | HTTP over TCP port `80` |
+| **User-Agent** | `NetSupport Manager/1.3` |
+| **Content-Type** | `application/x-www-form-urlencoded` |
+| **Payload Characteristics** | Starts in plaintext (`CMD=POLL`), then transitions to encrypted parameters (`CMD=ENCD`, `ES=1`) |
+
+#### 3. OSINT Threat Intelligence (VirusTotal & AbuseIPDB)
+
+**VirusTotal findings for `45.131.214[.]85`:**
+* **Detections:** 8 security vendors flagged this IP address as malicious (alphaMountain.ai, BitDefender, Dr.Web, Fortinet, G-Data, Lionic, Sophos, VIPRE).
+* **Relations:** Two files are communicating with this IP address:
+  * `712c7e845543e6ddd07f724b6f9a9a0e2c84fdf6d8956fdd2bef94775b2ef707`
+  * `c9e5bb7a368280d771edcfdb33717a3130560d2bb71773ab1aaffe0eb585fd2c`
+* **Key forensic findings extracted from the comments:**
+
+| Attribute | Value |
+| :--- | :--- |
+| **Threat Type** | `botnet_cc` |
+| **Confidence Level** | 100% (security analysts and threat intelligence platforms have already verified this infrastructure as active malware host infrastructure) |
+| **Country** | The Netherlands |
+
+**AbuseIPDB findings:**
+* **ISP (Internet Service Provider):** MHost LLC (hosting provider, similar to AWS)
+* **Country of origin:** Germany
+* **Reports:** No one has reported this IP address yet
 
 ### Investigation Roadmap & Status
 - [x] Phase 1: Network Triage & Victim Host Identification
-- [ ] Phase 2: Attack Chain Reconstruction & Payload Binary Extraction
+- [x] Phase 2: Attack Chain Reconstruction & Payload Binary Extraction
 - [ ] Phase 3: Command & Control (C2) Identification & Suricata Rule Engineering
 - [ ] Phase 4: Formal Incident Response Report Compilation
-- [ ] Phase 5: Final Code Quality & Portfolio Publishing
