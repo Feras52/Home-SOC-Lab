@@ -47,7 +47,7 @@ During the initial network triage of capture file 2026-02-28-traffic-analysis-ex
 
 > **Verification Note:** All extracted host identifiers and Kerberos user credentials were cross-validated using **NetworkMiner's** passive parsing engine (`Hosts` and `Credentials` tabs). NetworkMiner confirmed the exact IP Address, operating system TTL signatures, computer name (`DESKTOP-TEYQ2NR`), and Active Directory account (`brolf`) without requiring manual display filters.
 
-![NetworkMiner Cross-Validation](screenshots/P1_NetworkMiner_cross_validation.png)
+![NetworkMiner Cross-Validation](screenshots/P1_NetworkMiner_cross_validation_victim_credentials.png)
 
 ---
 
@@ -56,12 +56,12 @@ During the initial network triage of capture file 2026-02-28-traffic-analysis-ex
 #### 1. Identity Extraction via Kerberos Authentication Requests
 By applying the display filter `kerberos.CNameString` in Wireshark, Authentication Service Requests (`AS-REQ`) originating from IP `10.2.28.88` toward Domain Controller `10.2.28.2` were inspected. Parsing the `req-body` structures revealed the user account name (`brolf`) and realm (`EASYAS123`).
 
-![Kerberos Identity Extraction](screenshots/P1_kerberos.png)
+![Kerberos Identity Extraction](screenshots/P1_kerberos_display_filter.png)
 
 #### 2. Log Indexing & Web Traffic Summarization via Zui
 To isolate web traffic without performance degradation, the capture was indexed in **Zui**. Querying the Zeek HTTP logs (`_path=="http" | cut ts, id.orig_h, id.resp_h, host, uri`) revealed recurring outbound HTTP web requests originating from victim host `10.2.28.88` directed toward an external IP address (`45.131.214[.]85`), flagging this external endpoint for deep payload inspection.
 
-![Zui HTTP Log Triage](screenshots/P1_log_triage_http.png)
+![Zui HTTP Log Triage](screenshots/P1_log_triage_http_using_zui.png)
 
 ---
 
