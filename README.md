@@ -23,7 +23,7 @@ Rather than relying on simulated synthetic lab traffic, this investigation analy
 ├── rules/
 │   └── custom_detection.rules         <-- Custom Suricata Detection Signatures (Pending phase 3)
 ├── iocs/
-│   └── iocs.txt                       <-- Defanged Indicators of Compromise (Pending phase 2)
+│   └── iocs.txt                       <-- Defanged Indicators of Compromise 
 └── screenshots/                       <-- Forensic Evidence Screenshots
     ├── kerberos.png
     ├── log_triage_http.png
