@@ -1,3 +1,4 @@
+
 # Home SOC Lab: PCAP Malware & Network Intrusion Analysis
 
 ## Project Overview
@@ -116,8 +117,116 @@ The TCP conversation was reassembled to analyze the exact data payload sent by t
 * **Country of origin:** Germany
 * **Reports:** No one has reported this IP address yet
 
+---
+
+  
+
+## Phase 3: Rule Engineering
+
+  
+
+### Executive Summary
+
+  
+
+Create custom Suricata detection rules to automatically alert on this malicious activity in a Security Operations Center (SOC).
+
+  
+
+### Profiling C2 Artifacts in Wireshark
+
+  
+
+We already have the values we need for the rules:
+
+| **Destination IP / Port** | `45.131.214.85` : `80` |
+
+| **Target URI** | `/fakeurl.htm` |
+
+| **HTTP Method** | `POST` |
+
+| **User-Agent String** | `NetSupport Manager/1.3` |
+
+| **Host Header** | `45.131.214.85` |
+
+  
+
+### Authoring Custom Suricata Rules
+
+  
+
+Now, we will write a targeted detection rule designed to catch this specific malware infection.
+
+  
+
+This rule triggers whenever the host sends an HTTP POST request to the `/fakeurl.htm` endpoint.
+
+  
+
+Rule added in the `rules` folder (`rules/custom_detection.rules`):
+
+  
+
+```text
+
+alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"CUSTOM DETECT Malicious C2 HTTP POST Request to URI (/fakeurl.htm)"; flow:established,to_server; http.method; content:"POST"; http.uri; content:"/fakeurl.htm"; fast_pattern; classtype:trojan-activity; sid:1000001; rev:1;)
+
+```
+
+  
+
+### Testing & Validating Suricata Rules
+
+  
+
+We run Suricata offline directly against our `.pcap` file.
+
+  
+
+Executing Suricata in Windows CMD:
+
+  
+
+```text
+
+& "C:\Program Files\Suricata\suricata.exe" -c "C:\Program Files\Suricata\suricata.yaml" -s rules\custom_detection.rules -r sample_infection.pcap -l logs
+
+```
+
+  
+
+### Verifying Alert Outputs
+
+  
+
+Once Suricata finishes processing the PCAP, we check the generated alert logs.
+
+  
+
+#### Inspecting `fast.log` (Quick Text Summary)
+
+  
+
+![Suricata fast.log Alerts](screenshots/P3_fast_logs.png)
+
+  
+
+#### Inspecting `eve.json` (Structured JSON Log)
+
+  
+
+```text
+
+notepad logs\eve.json
+
+```
+
+  
+
+![Suricata eve.json Alerts](screenshots/P3_eve_json.png)
+
 ### Investigation Roadmap & Status
 - [x] Phase 1: Network Triage & Victim Host Identification
 - [x] Phase 2: Attack Chain Reconstruction & Payload Binary Extraction
-- [ ] Phase 3: Command & Control (C2) Identification & Suricata Rule Engineering
+- [x] Phase 3: Rule Engineering
 - [ ] Phase 4: Formal Incident Response Report Compilation
