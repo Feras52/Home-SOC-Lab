@@ -2,3 +2,9 @@
 # Target Host: 10.2.28.88 | C2 Infrastructure: 45.131.214.85
 
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"CUSTOM DETECT Malicious C2 HTTP POST Request to Pseudo-Static URI (/fakeurl.htm)"; flow:established,to_server; http.method; content:"POST"; http.uri; content:"/fakeurl.htm"; fast_pattern; classtype:trojan-activity; sid:1000001; rev:1;)
+
+
+
+# Suricata IPS Prevention Rule
+
+drop http $HOME_NET any -> $EXTERNAL_NET any (msg:"CUSTOM IPS DROP Malicious C2 Beaconing & Terminate Session (/fakeurl.htm)"; flow:established,to_server; http.method; content:"POST"; http.uri; content:"/fakeurl.htm"; fast_pattern; classtype:trojan-activity; sid:1000003; rev:1;)

@@ -25,6 +25,8 @@ Rather than relying on simulated synthetic lab traffic, this investigation analy
 │   └── custom_detection.rules         <-- Custom Suricata Detection Signatures 
 ├── iocs/
 │   └── iocs.txt                       <-- Defanged Indicators of Compromise 
+├── scripts/
+│   └── block_c2_infrastructure.ps1    <-- Automated Windows Containment Script
 └── screenshots/                       <-- Forensic Evidence Screenshots
     ├── kerberos.png
     ├── log_triage_http.png
@@ -230,3 +232,4 @@ notepad logs\eve.json
 - [x] Phase 2: Attack Chain Reconstruction & Payload Binary Extraction
 - [x] Phase 3: Rule Engineering
 - [x] Phase 4: Formal Incident Response Report Compilation
+- [x] Phase 5: Active Prevention, IPS Drop Rules & Automated Host Containment
