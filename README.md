@@ -28,9 +28,7 @@ Rather than relying on simulated synthetic lab traffic, this investigation analy
 ├── scripts/
 │   └── block_c2_infrastructure.ps1    <-- Automated Windows Containment Script
 └── screenshots/                       <-- Forensic Evidence Screenshots
-    ├── kerberos.png
-    ├── log_triage_http.png
-    └── NetworkMiner_cross_validation.png
+    
 ```
 
 ## Phase 1: Network Triage & Victim Host Identification 
@@ -226,6 +224,48 @@ notepad logs\eve.json
   
 
 ![Suricata eve.json Alerts](screenshots/P3_eve_json.png)
+
+---
+
+## Phase 4: Active Prevention, IPS Drop Rules & Automated Host Firewall Mitigation
+
+### Executive Summary
+Transition from passive detection (IDS) to active prevention (IPS) by authoring a Suricata drop rule and building an automated Windows PowerShell Firewall script to immediately block C2 infrastructure at the endpoint level.
+
+### Authoring a Suricata IPS Prevention Rule (drop)
+
+```text
+drop http $HOME_NET any -> $EXTERNAL_NET any (msg:"CUSTOM IPS DROP Malicious C2 Beaconing & Terminate Session (/fakeurl.htm)"; flow:established,to_server; http.method; content:"POST"; http.uri; content:"/fakeurl.htm"; fast_pattern; classtype:trojan-activity; sid:1000003; rev:1;)
+```
+
+### Automated Windows Firewall Block Script (PowerShell)
+To prevent any future packet from communicating with the C2 server `45.131.214[.]85`, we create a PowerShell script that acts as an automated host-based containment tool (`scripts/block_c2_infrastructure.ps1`).
+
+
+
+### Testing & Validating Containment
+
+Executed the automated block script (as Administrator):
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
+.\scripts\block_c2_infrastructure.ps1
+```
+
+Output:
+
+```text
+[*] Starting Incident Response Containment Action...
+[+] Creating Outbound & Inbound Block Rules for C2 IP: 45.131.214.85
+[SUCCESS] Host firewall rules applied successfully! Traffic to 45.131.214.85 is fully isolated.
+```
+
+Verifying the firewall rule:
+
+```powershell
+Get-NetFirewallRule -DisplayName "SOC-IR-BLOCK-C2-NetSupport-45.131.214.85-Outbound" | Get-NetFirewallAddressFilter
+```
+
 
 ### Investigation Roadmap & Status
 - [x] Phase 1: Network Triage & Victim Host Identification
