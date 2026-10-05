@@ -20,9 +20,9 @@ Rather than relying on simulated synthetic lab traffic, this investigation analy
 .
 ├── README.md                          <-- Executive Summary, Victim Triage & Technical Findings
 ├── reports/
-│   └── Incident_Response_Report.pdf   <-- Formal Incident Post-Mortem Report (Pending phase 4)
+│   └── Incident_Response_Report.pdf   <-- Formal Incident Post-Mortem Report 
 ├── rules/
-│   └── custom_detection.rules         <-- Custom Suricata Detection Signatures (Pending phase 3)
+│   └── custom_detection.rules         <-- Custom Suricata Detection Signatures 
 ├── iocs/
 │   └── iocs.txt                       <-- Defanged Indicators of Compromise 
 └── screenshots/                       <-- Forensic Evidence Screenshots
