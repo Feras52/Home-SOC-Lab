@@ -1,4 +1,4 @@
-# Custom Suricata Detection Rules - C2 Traffic Identification
+# Custom Suricata Detection Rules 
 # Target Host: 10.2.28.88 | C2 Infrastructure: 45.131.214.85
 
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"CUSTOM DETECT Malicious C2 HTTP POST Request to Pseudo-Static URI (/fakeurl.htm)"; flow:established,to_server; http.method; content:"POST"; http.uri; content:"/fakeurl.htm"; fast_pattern; classtype:trojan-activity; sid:1000001; rev:1;)
@@ -8,3 +8,12 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"CUSTOM DETECT Malicious C2 H
 # Suricata IPS Prevention Rule
 
 drop http $HOME_NET any -> $EXTERNAL_NET any (msg:"CUSTOM IPS DROP Malicious C2 Beaconing & Terminate Session (/fakeurl.htm)"; flow:established,to_server; http.method; content:"POST"; http.uri; content:"/fakeurl.htm"; fast_pattern; classtype:trojan-activity; sid:1000003; rev:1;)
+
+# Rule 2: Active IPS Drop - NetSupport RAT User-Agent (Survives URI Changes)
+drop http $HOME_NET any -> $EXTERNAL_NET any (msg:"CUSTOM IPS DROP NetSupport RAT Outbound User-Agent"; flow:established,to_server; http.user_agent; content:"NetSupport Manager/1.3"; fast_pattern; classtype:trojan-activity; sid:1000004; rev:2;)
+
+# Rule 3: Active IPS Drop - Cleartext HTTP over Port 443 (Protocol Anomaly)
+drop http $HOME_NET any -> $EXTERNAL_NET 443 (msg:"CUSTOM IPS DROP Cleartext HTTP Traffic over Non-Standard Port 443"; flow:established,to_server; classtype:bad-unknown; sid:1000005; rev:2;)
+
+# Rule 4: Active IPS Reject - C2 Domain DNS Query (Blocks Domain Resolution)
+reject dns $HOME_NET any -> $EXTERNAL_NET 53 (msg:"CUSTOM IPS REJECT DNS Query for NetSupport C2 (vadusa.xyz)"; dns.query; content:"vadusa.xyz"; nocase; fast_pattern; classtype:trojan-activity; sid:1000006; rev:2;)

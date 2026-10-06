@@ -69,7 +69,7 @@ To isolate web traffic without performance degradation, the capture was indexed 
 
 ---
 
-## Phase 2: Attack Chain Analysis, Payload Extraction & OSINT Threat Intelligence
+## Phase 2: Attack Chain Analysis & OSINT Threat Intelligence
 
 ### Executive Summary
 Following the Phase 1 flag on `45.131.214[.]85`, the HTTP traffic was analyzed in more depth. Zeek log analysis in Zui exposed a regular beaconing pattern, the TCP conversation was reassembled to inspect the raw payloads, and the destination IP was checked against OSINT sources (VirusTotal and AbuseIPDB).
@@ -84,7 +84,7 @@ Re-querying the Zeek HTTP logs with the method field added (`_path=="http" | cut
 **Anomalies detected:**
 1. POST requests sent to a static HTML page
 2. No DNS domain name (direct communication with an IP address)
-3. Suspicious URL (`/fakeurl.com`)
+3. Suspicious URL (`/fakeurl.htm`)
 
 > **Conclusion:** The host is actively communicating with a Command & Control (C2) server at `45.131.214[.]85` through automated POST requests (**C2 beaconing**).
 
@@ -95,7 +95,7 @@ The TCP conversation was reassembled to analyze the exact data payload sent by t
 
 | Characteristic | Extracted Value |
 | :--- | :--- |
-| **Protocol & Port** | HTTP over TCP port `80` |
+| **Protocol & Port** | HTTP over TCP port `443` |
 | **User-Agent** | `NetSupport Manager/1.3` |
 | **Content-Type** | `application/x-www-form-urlencoded` |
 | **Payload Characteristics** | Starts in plaintext (`CMD=POLL`), then transitions to encrypted parameters (`CMD=ENCD`, `ES=1`) |
@@ -272,7 +272,7 @@ Get-NetFirewallRule -DisplayName "SOC-IR-BLOCK-C2-NetSupport-45.131.214.85-Outbo
 
 ### Investigation Roadmap & Status
 - [x] Phase 1: Network Triage & Victim Host Identification
-- [x] Phase 2: Attack Chain Reconstruction & Payload Binary Extraction
+- [x] Phase 2: Attack Chain Analysis & OSINT Threat Intelligence
 - [x] Phase 3: Rule Engineering
 - [x] Phase 4: Active Prevention, IPS Drop Rules & Automated Host Containment
 - [x] Phase 5: Formal Incident Response Report Compilation
