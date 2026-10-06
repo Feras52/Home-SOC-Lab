@@ -274,5 +274,5 @@ Get-NetFirewallRule -DisplayName "SOC-IR-BLOCK-C2-NetSupport-45.131.214.85-Outbo
 - [x] Phase 1: Network Triage & Victim Host Identification
 - [x] Phase 2: Attack Chain Reconstruction & Payload Binary Extraction
 - [x] Phase 3: Rule Engineering
-- [x] Phase 4: Formal Incident Response Report Compilation
-- [x] Phase 5: Active Prevention, IPS Drop Rules & Automated Host Containment
+- [x] Phase 4: Active Prevention, IPS Drop Rules & Automated Host Containment
+- [x] Phase 5: Formal Incident Response Report Compilation
