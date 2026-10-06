@@ -241,14 +241,14 @@ drop http $HOME_NET any -> $EXTERNAL_NET any (msg:"CUSTOM IPS DROP Malicious C2 
 ```
 To prevent detection evasion if the threat actor alters the HTTP URI endpoint (e.g., changing `/fakeurl.htm` to another path), three additional behavioral rules were authored and validated against the PCAP. 
  ```text 
- # SID: 1000004 - NetSupport RAT User-Agent Signature (Survives URI changes) 
-alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"CUSTOM DETECT NetSupport RAT Outbound User-Agent Activity"; flow:established,to_server; http.user_agent; content:"NetSupport Manager/1.3"; fast_pattern; classtype:trojan-activity; sid:1000004; rev:1;) 
+Rule 2: Active IPS Drop - NetSupport RAT User-Agent (Survives URI Changes)
+drop http $HOME_NET any -> $EXTERNAL_NET any (msg:"CUSTOM IPS DROP NetSupport RAT Outbound User-Agent"; flow:established,to_server; http.user_agent; content:"NetSupport Manager/1.3"; fast_pattern; classtype:trojan-activity; sid:1000004; rev:2;)
 
- # SID: 1000005 - Plaintext HTTP Traffic over Non-Standard Port 443 
- alert http $HOME_NET any -> $EXTERNAL_NET 443 (msg:"CUSTOM DETECT Cleartext HTTP Traffic over Non-Standard Port 443"; flow:established,to_server; classtype:bad-unknown; sid:1000005; rev:1;) 
- 
- # SID: 1000006 - Known Malicious C2 Domain DNS Query Lookup 
- alert dns $HOME_NET any -> $EXTERNAL_NET 53 (msg:"CUSTOM DETECT DNS Query for Known NetSupport C2 Infrastructure (vadusa.xyz)"; dns.query; content:"vadusa.xyz"; nocase; fast_pattern; classtype:trojan-activity; sid:1000006; rev:1;)
+Rule 3: Active IPS Drop - Cleartext HTTP over Port 443 (Protocol Anomaly)
+drop http $HOME_NET any -> $EXTERNAL_NET 443 (msg:"CUSTOM IPS DROP Cleartext HTTP Traffic over Non-Standard Port 443"; flow:established,to_server; classtype:bad-unknown; sid:1000005; rev:2;)
+
+Rule 4: Active IPS Reject - C2 Domain DNS Query (Blocks Domain Resolution)
+reject dns $HOME_NET any -> $EXTERNAL_NET 53 (msg:"CUSTOM IPS REJECT DNS Query for NetSupport C2 (vadusa.xyz)"; dns.query; content:"vadusa.xyz"; nocase; fast_pattern; classtype:trojan-activity; sid:1000006; rev:2;)
 ```
 
 ### Automated Windows Firewall Block Script (PowerShell)
@@ -285,4 +285,4 @@ Get-NetFirewallRule -DisplayName "SOC-IR-BLOCK-C2-NetSupport-45.131.214.85-Outbo
 - [x] Phase 2: Attack Chain Analysis & OSINT Threat Intelligence
 - [x] Phase 3: Rule Engineering
 - [x] Phase 4: Active Prevention, IPS Drop Rules & Automated Host Containment
-- [x] Phase 5: Formal Incident Response Report Compilation
+- [x] Phase 5: Formal Incident Response Report Compilation 
