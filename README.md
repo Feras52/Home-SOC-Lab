@@ -123,7 +123,7 @@ The TCP conversation was reassembled to analyze the exact data payload sent by t
 
   
 
-## Phase 3: Rule Engineering
+## Phase 3: IDS Rule Engineering
 
   
 
@@ -283,6 +283,6 @@ Get-NetFirewallRule -DisplayName "SOC-IR-BLOCK-C2-NetSupport-45.131.214.85-Outbo
 ### Investigation Roadmap & Status
 - [x] Phase 1: Network Triage & Victim Host Identification
 - [x] Phase 2: Attack Chain Analysis & OSINT Threat Intelligence
-- [x] Phase 3: Rule Engineering
+- [x] Phase 3: IDS Rule Engineering
 - [x] Phase 4: Active Prevention, IPS Drop Rules & Automated Host Containment
 - [x] Phase 5: Formal Incident Response Report Compilation 
